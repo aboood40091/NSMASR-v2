@@ -421,4 +421,6 @@ class dBc_c {
 
         bool enteredPipeIsMini;
         // 2 bytes padding
+
+        int getSakaUpDown(unsigned char dir);
 };
