@@ -25,13 +25,13 @@ OUTPUT_BIN_DIR = Path(ROOT_DIR, 'assets', 'game', 'Code')
 
 # Add wine if not on Windows
 CC = [] if sys.platform == 'win32' else ['wine']
-CC.append(CODEWARRIOR)
+CC.append(str(CODEWARRIOR))
 
 # Compilation flags
 CFLAGS = [
     '-i', '.',
     '-I-',
-    '-i', INCLUDE_DIR,
+    '-i', str(INCLUDE_DIR),
     '-Cpp_exceptions', 'off',
     '-enum', 'int',
     '-fp', 'fmadd',
@@ -105,9 +105,10 @@ for region in REGION_LIST:
         # Make its destination path since CW isn't able to for some reason
         destpath = Path(OUTPUT_DIR, fp.relative_to(SRC_DIR)).with_suffix('.o')
         destpath.parent.mkdir(parents=True, exist_ok=True)
+        destpath = str(destpath)
 
         # Run CW, exit on failure
-        out = subprocess.run([*CC, *CFLAGS, f'-DREGION_{region}', '-c', '-o', destpath, fp])
+        out = subprocess.run([*CC, *CFLAGS, f'-DREGION_{region}', '-c', '-o', destpath, str(fp)])
         if out.returncode != 0:
             exit()
 
