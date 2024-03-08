@@ -51,7 +51,7 @@ int dMessageSpawner_c::create() {
     this->activateOnce = this->settings >> 18 & 1;
 
     // Check if the sprite is event triggered, and if not display it immediately
-    this->eventTriggered = bool(this->eventMask);
+    this->eventTriggered = bool(this->getEventMask());
     if (!this->eventTriggered) {
         this->box->startAnime = true;
         this->box->display = true;
@@ -64,7 +64,7 @@ int dMessageSpawner_c::execute() {
 
     // Dynamically show/hide the box if event triggered
     if (this->eventTriggered) {
-        bool eventOn = bool(dSwitchFlagMng_c::m_instance->flags & this->eventMask);
+        bool eventOn = bool(dSwitchFlagMng_c::m_instance->flags & this->getEventMask());
 
         // If the event is activated and the box isn't already displaying, fade it in!
         if (eventOn && !this->box->display) {

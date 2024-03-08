@@ -60,3 +60,4 @@ class dBaseActor_c : public dBase_c {
 
         virtual void finalUpdate();
 };
+static_assert(sizeof(dBaseActor_c) == 0x128);

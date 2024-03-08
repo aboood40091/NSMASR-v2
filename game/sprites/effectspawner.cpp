@@ -50,7 +50,7 @@ int dEffectSpawner_c::create() {
 int dEffectSpawner_c::execute() {
 
     // If event is triggered and the game isn't paused, act!
-    if ((dSwitchFlagMng_c::m_instance->flags & this->eventMask) && (!PauseManager_c::m_Pause)) {
+    if ((dSwitchFlagMng_c::m_instance->flags & this->getEventMask()) && (!PauseManager_c::m_Pause)) {
 
         // If the loop delay matches the timer, play the effect
         if (this->timer == this->delay) {

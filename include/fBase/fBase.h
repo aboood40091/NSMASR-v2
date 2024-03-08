@@ -2,6 +2,14 @@
 #include <egg/core/eggFrmHeap.h>
 #include <fBase/fManager.h>
 
+#ifndef static_assert
+    // https://stackoverflow.com/a/1597129
+    #define TOKENPASTE(x, y) x ## y
+    #define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+
+    #define static_assert(condition, ...) typedef int TOKENPASTE2(static_assert_, __LINE__)[(condition) ? 1 : -1]
+#endif // static_assert
+
 class fBase_c {
     public:
         enum MAIN_STATE_e {
@@ -58,3 +66,4 @@ class fBase_c {
 
         static fBase_c* createChild(u16 profileId, fBase_c* parent, ulong settings, u8 groupType);
 };
+static_assert(sizeof(fBase_c) == 0x64);

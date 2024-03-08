@@ -25,3 +25,4 @@ class dBase_c : public fBase_c {
 
         virtual char* getKindString() const;
 };
+static_assert(sizeof(dBase_c) == 0x70);

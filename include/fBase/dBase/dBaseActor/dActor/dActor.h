@@ -52,7 +52,7 @@ class dActor_c : public dBaseActor_c {
         u16* shortStorage; // links to dActorCreateMng_c
         u8 eventNums[2];
         // 2 bytes padding
-        u64 eventMask;
+        u32 eventMaskArray[2];
 
         u32 _360; // used creatively by various actors
         u16 spawnInfoFlags;
@@ -136,4 +136,9 @@ class dActor_c : public dBaseActor_c {
         virtual void poisonSplashEffect(const mVec3_c& pos, float scale);
 
         bool checkZoneBoundaries(u32 flags); // unofficial name, &2 = does not delete offscreen actors, &4 = only checks zone boundaries &8 = checks ride output instead of bounds
+
+        u64 getEventMask() const {
+            return ((u64)(eventMaskArray[0]) << 32) | eventMaskArray[1];
+        }
 };
+static_assert(sizeof(dActor_c) == 0x394);

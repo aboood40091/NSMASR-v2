@@ -29,7 +29,7 @@ int dPlayerCountEvent_c::execute() {
     u8 targetEvent = this->events[pCount];
 
     // If the triggering event id was activated, activate the target for the corresponding event
-    if (this->eventMask == 0 || dSwitchFlagMng_c::m_instance->flags & this->eventMask) {
+    if (this->getEventMask() == 0 || dSwitchFlagMng_c::m_instance->flags & this->getEventMask()) {
 
         if (targetEvent != 0)
             dSwitchFlagMng_c::m_instance->set(targetEvent - 1, 0, !this->isDeactivate, false, false, false);
