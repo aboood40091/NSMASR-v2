@@ -1,7 +1,7 @@
 #include <kamek.h>
 //#include <rvl/os/OS.h>
 
-#include <fBase/dBase/dBaseActor/dActor/daPlBase/daPlBase.h>
+#include <fBase/dBase/dBaseActor/dActor/daPlBase/dAcPy.h>
 
 // Disable powerup freeze
 kmWrite8(0x800BB481, 0xED);
@@ -179,3 +179,195 @@ kmWrite32(0x8042db68, 0xBD4CCCCD); // -0.05f
 kmWrite32(0x8042db70, 0xBD0F5C29); // -0.035f
 kmWrite32(0x8042db6c, 0xBDA7EF9E); // -0.082f
 kmWrite32(0x8042bb3c, 0x40000000); // 2.0f
+
+// ------------------------------------------------------------------------------------------------
+static int s_jumpAnmID[4] = { -1, -1, -1, -1 };
+static float s_jumpAnmRate[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+class sLib {
+    public:
+        static bool chase(float* value, float target, float step);
+};
+
+kmBranchDefCpp(0x80128120, 0x8012812c, void, dAcPy_c* _this) {
+  _this->action = 0;
+  s_jumpAnmID[_this->playerNo] = -1;
+  s_jumpAnmRate[_this->playerNo] = 0.5;
+  _this->angle.x = 0;
+  _this->angle.y = _this->getMukiAngle(_this->direction);
+  _this->setWaterWalkFlag();
+}
+
+kmBranchDefCpp(0x80127cb8, 0x80127ce8, void, dAcPy_c* _this, int status_bit) {
+  _this->offStatus(status_bit);
+  _this->mdlMng.setAnm(6, 10.0, 0.0);
+  s_jumpAnmID[_this->playerNo] = 6; // New addition
+}
+
+extern "C" {
+
+extern int DWORD_ARRAY_802f5108[3];
+
+int dAcPy_c__getJump2AnimID(dAcPy_c* _this)
+{
+  if (_this->isStatus(0xd)) {
+    return 68;
+  }
+  else if (_this->isStatus(0xf)) {
+    return 119;
+  }
+  else if (_this->jumpSoundRelated != 2) {
+    return DWORD_ARRAY_802f5108[_this->jumpSoundRelated];
+  }
+  return -1;
+}
+
+int dAcPy_c__getJump3AnimID(dAcPy_c* _this)
+{
+  if (_this->isStatus(0xd)) {
+    return 84;
+  }
+  else if (_this->isStatus(0xf)) {
+    return 119;
+  }
+  else if (_this->jumpSoundRelated != 2) {
+    return 158;
+  }
+  return -1;
+}
+
+int dAcPy_c__getPhysicsAnimType(dAcPy_c* _this)
+{
+  if ((_this->_10d4 & 1) == 0
+      // && !_this->forceNeutralJumpFall() // TODO: This occurs on triple jump, figure out equivalent in NSMBW
+  ) {
+    if (_this->key.buttonJump()) {
+      return 0;
+    }
+    else {
+      return 1;
+    }
+  }
+  return 2;
+}
+
+void dAcPy_c__jumpStartWithPhysics(dAcPy_c* _this)
+{
+//OSReport("dAcPy_c__jumpStartWithPhysics()\n");
+  if (_this->isStatus(0xc)) {
+    _this->action = 1;
+  }
+  else if (_this->isStatus(0x10)) {
+    if (_this->mdlMng.pMdlBase->isAnmStop()) {
+      _this->mdlMng.setAnm(6, 3.0, 0.0);
+      s_jumpAnmID[_this->playerNo] = 6;
+      _this->action = 1;
+    }
+  }
+  else {
+    if (_this->speed.y < 0.0) {
+      const int anmID = dAcPy_c__getJump2AnimID(_this);
+      if (anmID != -1) {
+        if (anmID == 68) {
+          _this->mdlMng.setAnm(68, 10.0, 0.0);
+        }
+        else {
+          _this->mdlMng.setAnm(anmID, 0.0);
+        }
+        s_jumpAnmID[_this->playerNo] = anmID;
+        _this->action = 1;
+      }
+    }
+    if (dAcPy_c__getPhysicsAnimType(_this) == 0 &&
+        (_this->mdlMng.pMdlBase->isAnmStop() || _this->speed.y < 2.5)) {
+      const int anmID = dAcPy_c__getJump3AnimID(_this);
+      if (anmID != -1) {
+        switch (anmID) {
+        case 84:
+          _this->mdlMng.setAnm(84, 3.0, 0.0);    // Not 100% accurate, but perhaps good enough
+          break;
+        default:
+          _this->mdlMng.setAnm(anmID, 0.0);      // Not 100% accurate, but perhaps good enough
+          break;
+        case 158:
+          _this->mdlMng.setAnm(158, 10.0, 0.0);
+        }
+        s_jumpAnmID[_this->playerNo] = dAcPy_c__getJump2AnimID(_this);
+        _this->action = 1;
+      }
+    }
+  }
+  _this->jumpExecAir();
+}
+
+void dAcPy_c__jumpExecAirWithPhysics(dAcPy_c* _this)
+{
+//OSReport("dAcPy_c__jumpExecAirWithPhysics()\n");
+  if (_this->jumpSoundRelated == 2) {
+    u8 dir = _this->direction;
+    if (dir != _this->_27cc || (_this->_10d4 >> 1 & 1) != 0) {
+      _this->_27cc = dir;
+      _this->mdlMng.setAnm(
+        11,
+        0.0,
+        _this->mdlMng.pMdlBase->getAnmFrameMax() - 1.0
+      );
+      s_jumpAnmID[_this->playerNo] = 11;
+    //_this->setForceNeutralJumpFall(false); // TODO: Figure out equivalent in NSMBW
+    }
+    if (_this->mdlMng.pMdlBase->isAnmStop()) {
+    //_this->setForceNeutralJumpFall(false); // TODO: Figure out equivalent in NSMBW
+    }
+  }
+  switch (dAcPy_c__getPhysicsAnimType(_this)) {
+  case 0:
+    {
+      const int anmID = dAcPy_c__getJump3AnimID(_this);
+      if (anmID != -1) {
+        const float rate = dPyMdlMng_c::getAnmRate(anmID);
+        float blendDuration;
+        switch (anmID) {
+        case 84:
+          blendDuration = 3.0;  // Not 100% accurate, but perhaps good enough
+          break;
+        default:
+          blendDuration = dPyMdlMng_c::getAnmBlendDuration(anmID);
+          break;
+        case 158:
+          blendDuration = 10.0;
+        }
+        sLib::chase(&(s_jumpAnmRate[_this->playerNo]), 1.5, 0.02);
+        _this->mdlMng.setAnm(
+            anmID,
+            s_jumpAnmRate[_this->playerNo] * rate,
+            blendDuration,
+            0.0
+        );
+      }
+      if (_this->mdlMng.pMdlBase->checkAnmFrame(8.0) ||
+          _this->mdlMng.pMdlBase->checkAnmFrame(19.0)) {
+        _this->startSound(284, 0); // 284 -> SE_PLY_PRPL_FLY
+      }
+    }
+    break;
+  case 1:
+    {
+      if (s_jumpAnmID[_this->playerNo] != -1) {
+        _this->mdlMng.setAnm(s_jumpAnmID[_this->playerNo], 5.0, 0.0);
+      }
+      s_jumpAnmRate[_this->playerNo] = 0.5;
+    }
+    break;
+  default:
+    {
+      s_jumpAnmRate[_this->playerNo] = 0.5;
+    }
+    break;
+  }
+  _this->jumpExecAir();
+}
+
+}
+
+kmWritePointer(0x80324e88, &dAcPy_c__jumpStartWithPhysics);
+kmWritePointer(0x80324e94, &dAcPy_c__jumpExecAirWithPhysics);

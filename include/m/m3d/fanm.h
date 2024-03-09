@@ -17,6 +17,9 @@ class fanm_c : public banm_c {
         virtual AnmType::Value getType() const = 0;
         virtual void play();
 
+        bool checkFrame(float) const;
+        bool isStop() const;
+
         float numFrames;
         float startFrame;
         float currentFrame;

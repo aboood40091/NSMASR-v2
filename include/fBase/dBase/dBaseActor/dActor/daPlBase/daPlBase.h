@@ -6,6 +6,7 @@ class dAcPyKey_c {
 
         bool buttonWalk(int* p_dir) const;
         bool buttonDush() const;
+        bool buttonJump();
 };
 static_assert(sizeof(dAcPyKey_c) == 0x164);
 
@@ -39,7 +40,11 @@ class daPlBase_c : public dActor_c {
         u32 _1008[(0x1060 - 0x1008) / sizeof(u32)];
         PlayerSpeedData* speedDataNormal;
         PlayerSpeedData* speedDataStar;
-        u32 _1068[(0x14D4 - 0x1068) / sizeof(u32)];
+        u32 _1068[(0x10D4 - 0x1068) / sizeof(u32)];
+        u32 _10d4;
+        u32 _10d8[(0x14A4 - 0x10D8) / sizeof(u32)];
+        u32 action;
+        u32 _14a8[(0x14D4 - 0x14A8) / sizeof(u32)];
 
         static const float sc_DirSpeed[2];
 
@@ -51,6 +56,9 @@ class daPlBase_c : public dActor_c {
         void getSpeedDataInner(PlayerSpeedDataInner*);
         float getSakaStopAccele(unsigned char dir);
         int getPowerChangeType(bool);
+        s16 getMukiAngle(unsigned char dir);
+        void offStatus(int status_bit);
+        void startSound(int soundId, int);
 
 };
 static_assert(sizeof(daPlBase_c) == 0x14D4);
