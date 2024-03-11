@@ -238,8 +238,10 @@ int dAcPy_c__getJump3AnimID(dAcPy_c* _this)
 
 int dAcPy_c__getPhysicsAnimType(dAcPy_c* _this)
 {
+//OSReport("dAcPy_c__getPhysicsAnimType: star timer: %d\n", _this->isStar());
   if ((_this->_10d4 & 1) == 0
-      // && !_this->forceNeutralJumpFall() // TODO: This occurs on triple jump, figure out equivalent in NSMBW
+      // && !_this->forceNeutralJumpFall() // TODO: This occurs in states such as triple jump, figure out equivalent in NSMBW (May be unnecessary)
+      && _this->isStar() == 0
   ) {
     if (_this->key.buttonJump()) {
       return 0;
@@ -313,10 +315,10 @@ void dAcPy_c__jumpExecAirWithPhysics(dAcPy_c* _this)
         _this->mdlMng.pMdlBase->getAnmFrameMax() - 1.0
       );
       s_jumpAnmID[_this->playerNo] = 11;
-    //_this->setForceNeutralJumpFall(false); // TODO: Figure out equivalent in NSMBW
+    //_this->setForceNeutralJumpFall(false); // TODO: Figure out equivalent in NSMBW (May be unnecessary)
     }
     if (_this->mdlMng.pMdlBase->isAnmStop()) {
-    //_this->setForceNeutralJumpFall(false); // TODO: Figure out equivalent in NSMBW
+    //_this->setForceNeutralJumpFall(false); // TODO: Figure out equivalent in NSMBW (May be unnecessary)
     }
   }
   switch (dAcPy_c__getPhysicsAnimType(_this)) {

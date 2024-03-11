@@ -318,3 +318,4 @@ jumpExecAir__7dAcPy_cFv=0x80127c70
 chase__4sLibFPfff=0x8015f5b0
 checkFrame__Q23m3d6fanm_cCFf=0x80169220
 startSound__10daPlBase_cFii=0x80057e70
+isStar__7dAcPy_cCFv=0x80022170

@@ -134,5 +134,9 @@ class dAcPy_c : public daPlBase_c {
 
         void setWaterWalkFlag();
         void jumpExecAir();
+
+        // Actually a virtual function of dPlBase_c, but we can guarantee that
+        // instances of dAcPy_c will definitely call this one specifically
+        int isStar() const;
 };
 static_assert(sizeof(dAcPy_c) == 0x2BA8);
